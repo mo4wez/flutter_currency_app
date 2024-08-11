@@ -83,7 +83,11 @@ class HomePage extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Image.asset('assets/images/info_icon.png'),
+                  Image.asset(
+                    'assets/images/info_icon.png',
+                    width: 18,
+                    height: 16,
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     'نرخ ارز آزاد چیست؟ ',
@@ -91,13 +95,39 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
               Text(
                 ' نرخ ارزها در معاملات نقدی و رایج روزانه است معاملات نقدی معاملاتی هستند که خریدار و فروشنده به محض انجام معامله، ارز و ریال را با هم تبادل می نمایند.',
                 textDirection: TextDirection.rtl,
                 style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
+                child: Container(
+                  height: 35,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(1000),
+                      color: Color.fromARGB(255, 130, 130, 130)),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      Text(
+                        'نام آزاد ارز',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                      Text(
+                        'قیمت',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                      Text(
+                        'تغییر',
+                        style: Theme.of(context).textTheme.displayMedium,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
