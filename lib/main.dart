@@ -22,6 +22,23 @@ class MyApp extends StatelessWidget {
       ],
       theme: ThemeData(
         fontFamily: 'Vazirmatn',
+        textTheme: TextTheme(
+          displayLarge: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w700,
+            fontSize: 16,
+          ),
+          bodyLarge: TextStyle(
+            color: Colors.black87,
+            fontWeight: FontWeight.w300,
+            fontSize: 14,
+          ),
+          displayMedium: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.normal,
+            fontSize: 15,
+          ),
+        ),
       ),
       home: HomePage(),
     );
@@ -36,24 +53,31 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: Color.fromARGB(255, 243, 243, 243),
         appBar: AppBar(
           actions: [
+            const SizedBox(
+              width: 8,
+            ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(12),
               child: Image.asset('assets/images/icon.png'),
             ),
-            const Text('قیمت بروز ارز'),
+            Text(
+              'قیمت بروز سکه و ارز',
+              style: Theme.of(context).textTheme.displayLarge,
+            ),
             Expanded(
                 child: Align(
                     alignment: Alignment.centerLeft,
                     child: Image.asset('assets/images/menu.png'))),
             const SizedBox(
-              width: 10,
+              width: 16,
             )
           ],
         ),
         body: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 16),
           child: Column(
             children: [
               Row(
@@ -61,12 +85,19 @@ class HomePage extends StatelessWidget {
                 children: [
                   Image.asset('assets/images/info_icon.png'),
                   const SizedBox(width: 8),
-                  const Text('نرخ ارز آزاد چیست؟ '),
+                  Text(
+                    'نرخ ارز آزاد چیست؟ ',
+                    style: Theme.of(context).textTheme.displayLarge,
+                  ),
                 ],
               ),
-              const Text(
+              SizedBox(
+                height: 12,
+              ),
+              Text(
                 ' نرخ ارزها در معاملات نقدی و رایج روزانه است معاملات نقدی معاملاتی هستند که خریدار و فروشنده به محض انجام معامله، ارز و ریال را با هم تبادل می نمایند.',
                 textDirection: TextDirection.rtl,
+                style: Theme.of(context).textTheme.bodyLarge,
               ),
             ],
           ),
