@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
@@ -134,48 +135,150 @@ class HomePage extends StatelessWidget {
                 ),
                 Container(
                     width: double.infinity,
-                    height: 700,
-                    child: ListView.builder(
-                        itemCount: 30,
-                        itemBuilder: (BuildContext context, int count) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(2, 8, 2, 0),
-                            child: Container(
-                              width: double.infinity,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(32),
-                                  boxShadow: <BoxShadow>[
-                                    BoxShadow(
-                                        blurRadius: 1.0, color: Colors.grey),
-                                  ]),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    'دلار',
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                  Text(
-                                    '60000',
-                                    style:
-                                        Theme.of(context).textTheme.bodyLarge,
-                                  ),
-                                  Text('+5',
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyLarge),
-                                ],
-                              ),
-                            ),
-                          );
-                        }))
+                    height: 510,
+                    child: ListView.separated(
+                      itemCount: 30,
+                      itemBuilder: (BuildContext context, int position) {
+                        return CurrencyItemWidget();
+                      },
+                      separatorBuilder: (BuildContext context, int index) {
+                        if (index % 9 == 0) {
+                          return AdvertisementWidget();
+                        } else {
+                          return const SizedBox.shrink();
+                        }
+                      },
+                    )),
+                Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color.fromARGB(255, 232, 232, 232),
+                        borderRadius: BorderRadius.circular(1000),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          UpdateButtonWidget(),
+                          SizedBox(
+                            width: 18,
+                          ),
+                          Text(
+                            'آخرین بروزرسانی در ${_updatedAt()}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .displayMedium!
+                                .copyWith(color: Colors.black54, fontSize: 18),
+                          )
+                        ],
+                      ),
+                    )),
               ],
             ),
           ),
         ));
+  }
+}
+
+String _updatedAt() {
+  return '21:50';
+}
+
+void _showSnackBar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    backgroundColor: Colors.green,
+  ));
+}
+
+class UpdateButtonWidget extends StatelessWidget {
+  const UpdateButtonWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 50,
+      child: TextButton.icon(
+        onPressed: () => _showSnackBar(context, 'با موفقیت بروزرسانی شد.'),
+        icon: const Icon(
+          CupertinoIcons.refresh,
+        ),
+        label: Text(
+          'به روز رسانی',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+        style: const ButtonStyle(
+          iconColor: WidgetStatePropertyAll(Colors.black),
+          backgroundColor:
+              WidgetStatePropertyAll(Color.fromARGB(255, 202, 193, 255)),
+        ),
+      ),
+    );
+  }
+}
+
+class AdvertisementWidget extends StatelessWidget {
+  const AdvertisementWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 2, bottom: 2),
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+            color: Colors.red, borderRadius: BorderRadius.circular(1000)),
+        child: Center(
+          child: Text(
+            'تبلیغات',
+            style: Theme.of(context).textTheme.displayMedium,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class CurrencyItemWidget extends StatelessWidget {
+  const CurrencyItemWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 4, 2, 4),
+      child: Container(
+        width: double.infinity,
+        height: 50,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: <BoxShadow>[
+              BoxShadow(blurRadius: 1.0, color: Colors.grey),
+            ]),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text(
+              'دلار',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Text(
+              '60000',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            Text('+5', style: Theme.of(context).textTheme.bodyLarge),
+          ],
+        ),
+      ),
+    );
   }
 }
