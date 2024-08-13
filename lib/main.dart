@@ -1,6 +1,9 @@
+import 'package:currency_app/models/currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' as convert;
 
 void main() {
   runApp(const MyApp());
@@ -39,6 +42,13 @@ class MyApp extends StatelessWidget {
             fontWeight: FontWeight.normal,
             fontSize: 15,
           ),
+          labelMedium: TextStyle(
+            color: Colors.red,
+            fontSize: 13,
+          ),
+          labelLarge: TextStyle(
+            color: Colors.green,
+          ),
         ),
       ),
       home: HomePage(),
@@ -46,13 +56,45 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomePage extends StatelessWidget {
-  const HomePage({
+class HomePage extends StatefulWidget {
+  HomePage({
     super.key,
   });
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  List<Currency> currencyList = [];
+
+  _getCurrencyData() {
+    var url =
+        'https://sasansafari.com/flutter/api.php?access_key=flutter123456';
+    http.get(Uri.parse(url)).then((value) {
+      if (currencyList.isEmpty) {
+        if (value.statusCode == 200) {
+          List jsonArray = convert.jsonDecode(value.body);
+          if (jsonArray.isNotEmpty) {
+            for (int i = 0; i < jsonArray.length; i++) {
+              setState(() {
+                currencyList.add(Currency(
+                    id: jsonArray[i]["id"],
+                    title: jsonArray[i]["title"],
+                    price: jsonArray[i]["price"],
+                    changes: jsonArray[i]["changes"],
+                    status: jsonArray[i]["status"]));
+              });
+            }
+          }
+        }
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _getCurrencyData();
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 243, 243, 243),
         appBar: AppBar(
@@ -137,9 +179,12 @@ class HomePage extends StatelessWidget {
                     width: double.infinity,
                     height: 510,
                     child: ListView.separated(
-                      itemCount: 30,
+                      itemCount: currencyList.length,
                       itemBuilder: (BuildContext context, int position) {
-                        return CurrencyItemWidget();
+                        return CurrencyItemWidget(
+                          position,
+                          currencyList,
+                        );
                       },
                       separatorBuilder: (BuildContext context, int index) {
                         if (index % 9 == 0) {
@@ -247,9 +292,10 @@ class AdvertisementWidget extends StatelessWidget {
 }
 
 class CurrencyItemWidget extends StatelessWidget {
-  const CurrencyItemWidget({
-    super.key,
-  });
+  int position;
+  List<Currency> currency;
+
+  CurrencyItemWidget(this.position, this.currency, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -268,14 +314,19 @@ class CurrencyItemWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text(
-              'دلار',
+              currency[position].title!,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             Text(
-              '60000',
-              style: Theme.of(context).textTheme.bodyLarge,
+              currency[position].price!,
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            Text('+5', style: Theme.of(context).textTheme.bodyLarge),
+            Text(
+                textDirection: TextDirection.ltr,
+                currency[position].changes!,
+                style: currency[position].status == 'n'
+                    ? Theme.of(context).textTheme.labelMedium
+                    : Theme.of(context).textTheme.labelLarge),
           ],
         ),
       ),
