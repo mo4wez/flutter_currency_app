@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' as convert;
+import 'dart:developer' as developer;
 
 void main() {
   runApp(const MyApp());
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
       ],
       theme: ThemeData(
         fontFamily: 'Vazirmatn',
-        textTheme: TextTheme(
+        textTheme: const TextTheme(
           displayLarge: TextStyle(
             color: Colors.black,
             fontWeight: FontWeight.w700,
@@ -68,33 +69,42 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<Currency> currencyList = [];
 
-  _getCurrencyData() {
+  Future _getCurrencyData(BuildContext context) async {
     var url =
         'https://sasansafari.com/flutter/api.php?access_key=flutter123456';
-    http.get(Uri.parse(url)).then((value) {
-      if (currencyList.isEmpty) {
-        if (value.statusCode == 200) {
-          List jsonArray = convert.jsonDecode(value.body);
-          if (jsonArray.isNotEmpty) {
-            for (int i = 0; i < jsonArray.length; i++) {
-              setState(() {
-                currencyList.add(Currency(
-                    id: jsonArray[i]["id"],
-                    title: jsonArray[i]["title"],
-                    price: jsonArray[i]["price"],
-                    changes: jsonArray[i]["changes"],
-                    status: jsonArray[i]["status"]));
-              });
-            }
+    var response = await http.get(Uri.parse(url));
+
+    if (currencyList.isEmpty) {
+      if (response.statusCode == 200) {
+        _showSnackBar(context, 'بروزرسانی موفقیت آمیز بود.');
+        List jsonArray = convert.jsonDecode(response.body);
+        if (jsonArray.isNotEmpty) {
+          for (int i = 0; i < jsonArray.length; i++) {
+            setState(() {
+              currencyList.add(Currency(
+                  id: jsonArray[i]["id"],
+                  title: jsonArray[i]["title"],
+                  price: jsonArray[i]["price"],
+                  changes: jsonArray[i]["changes"],
+                  status: jsonArray[i]["status"]));
+            });
           }
         }
       }
-    });
+    }
+    return response;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _getCurrencyData(context);
+    developer.log('initState', name: 'Widget Life Cycle');
   }
 
   @override
   Widget build(BuildContext context) {
-    _getCurrencyData();
+    developer.log('build', name: 'Widget Life Cycle');
     return Scaffold(
         backgroundColor: Color.fromARGB(255, 243, 243, 243),
         appBar: AppBar(
@@ -178,22 +188,7 @@ class _HomePageState extends State<HomePage> {
                 Container(
                     width: double.infinity,
                     height: 510,
-                    child: ListView.separated(
-                      itemCount: currencyList.length,
-                      itemBuilder: (BuildContext context, int position) {
-                        return CurrencyItemWidget(
-                          position,
-                          currencyList,
-                        );
-                      },
-                      separatorBuilder: (BuildContext context, int index) {
-                        if (index % 9 == 0) {
-                          return AdvertisementWidget();
-                        } else {
-                          return const SizedBox.shrink();
-                        }
-                      },
-                    )),
+                    child: futureBuilderMethod(context)),
                 Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Container(
@@ -206,8 +201,28 @@ class _HomePageState extends State<HomePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          UpdateButtonWidget(),
                           SizedBox(
+                            height: 50,
+                            child: TextButton.icon(
+                              onPressed: () {
+                                currencyList.clear();
+                                futureBuilderMethod(context);
+                              },
+                              icon: const Icon(
+                                CupertinoIcons.refresh,
+                              ),
+                              label: Text(
+                                'به روز رسانی',
+                                style: Theme.of(context).textTheme.displayLarge,
+                              ),
+                              style: const ButtonStyle(
+                                iconColor: WidgetStatePropertyAll(Colors.black),
+                                backgroundColor: WidgetStatePropertyAll(
+                                    Color.fromARGB(255, 202, 193, 255)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
                             width: 18,
                           ),
                           Text(
@@ -225,6 +240,34 @@ class _HomePageState extends State<HomePage> {
           ),
         ));
   }
+
+  FutureBuilder<dynamic> futureBuilderMethod(BuildContext context) {
+    return FutureBuilder(
+      future: _getCurrencyData(context),
+      builder: (context, snapshot) {
+        return snapshot.hasData
+            ? ListView.separated(
+                itemCount: currencyList.length,
+                itemBuilder: (BuildContext context, int position) {
+                  return CurrencyItemWidget(
+                    position,
+                    currencyList,
+                  );
+                },
+                separatorBuilder: (BuildContext context, int index) {
+                  if (index % 9 == 0) {
+                    return AdvertisementWidget();
+                  } else {
+                    return const SizedBox.shrink();
+                  }
+                },
+              )
+            : const Center(
+                child: CircularProgressIndicator(),
+              );
+      },
+    );
+  }
 }
 
 String _updatedAt() {
@@ -236,34 +279,6 @@ void _showSnackBar(BuildContext context, String message) {
     content: Text(message),
     backgroundColor: Colors.green,
   ));
-}
-
-class UpdateButtonWidget extends StatelessWidget {
-  const UpdateButtonWidget({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 50,
-      child: TextButton.icon(
-        onPressed: () => _showSnackBar(context, 'با موفقیت بروزرسانی شد.'),
-        icon: const Icon(
-          CupertinoIcons.refresh,
-        ),
-        label: Text(
-          'به روز رسانی',
-          style: Theme.of(context).textTheme.displayLarge,
-        ),
-        style: const ButtonStyle(
-          iconColor: WidgetStatePropertyAll(Colors.black),
-          backgroundColor:
-              WidgetStatePropertyAll(Color.fromARGB(255, 202, 193, 255)),
-        ),
-      ),
-    );
-  }
 }
 
 class AdvertisementWidget extends StatelessWidget {
@@ -292,8 +307,8 @@ class AdvertisementWidget extends StatelessWidget {
 }
 
 class CurrencyItemWidget extends StatelessWidget {
-  int position;
-  List<Currency> currency;
+  final int position;
+  final List<Currency> currency;
 
   CurrencyItemWidget(this.position, this.currency, {super.key});
 
